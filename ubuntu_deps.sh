@@ -2,8 +2,7 @@
 
 # Install deps
 sudo apt-get update
-sudo apt-get install cmake maven libthrift-java libboost-dev libboost-test-dev libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libevent-dev automak
-e libtool flex bison pkg-config g++ libssl-dev python-dev openjdk-7-jdk
+sudo apt-get install cmake maven libthrift-java libboost-dev libboost-test-dev libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libevent-dev automake libtool flex bison pkg-config g++ libssl-dev python-dev openjdk-7-jdk
 
 # Install thrift
 wget http://archive.apache.org/dist/thrift/0.9.1/thrift-0.9.1.tar.gz
