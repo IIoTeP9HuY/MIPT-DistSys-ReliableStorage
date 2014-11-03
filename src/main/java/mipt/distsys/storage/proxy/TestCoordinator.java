@@ -147,5 +147,7 @@ public class TestCoordinator
         } catch (TestFailedException e) {
             System.err.println("Test failed: " + e.getMessage());
         }
+
+        java.rmi.server.UnicastRemoteObject.unexportObject(service, true);
     }
 }
