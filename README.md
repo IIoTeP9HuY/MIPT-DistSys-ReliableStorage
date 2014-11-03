@@ -16,6 +16,7 @@ Build Instructions
 ============================
 
 Code succesfully builds on Archlinux and Ubuntu14.04
+
 Dependencies:
   - g++4.8
   - boost
