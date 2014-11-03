@@ -2,7 +2,7 @@
 
 echo "Running server"
 # ./build/bin/CppServer 2> server_log &
-./build/bin/CppServer &
+./build/server &
 SERVER_PID=$!
 sleep 1
 
