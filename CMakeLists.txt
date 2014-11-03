@@ -15,6 +15,7 @@ set(LOGGER_SRC ${CPP_DIR}/logger/logger.hpp ${CPP_DIR}/logger/logger.cpp)
 
 # Thrift
 find_package(Thrift REQUIRED)
+link_directories(${THRIFT_SHARED_LIB_PATH})
 include_directories(${THRIFT_INCLUDE_DIR})
 set(THRIFT_DIR ${SRC_DIR}/main/thrift)
 set(THRIFT_SRC ${THRIFT_DIR}/ReplicatedStorage.thrift)

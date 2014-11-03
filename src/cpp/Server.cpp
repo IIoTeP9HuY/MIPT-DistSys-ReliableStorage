@@ -40,7 +40,6 @@ public:
 
   void ping(ViewInfo& viewInfo, const int32_t viewNum, const string& name) {
     Log::trace("ping(", viewNum, ", ", name, ")");
-    Log::debug("before view(", currentViewInfo.view, ", ", currentViewInfo.primary, ", ", currentViewInfo.backup, ")");
     ViewInfo viewBefore = currentViewInfo;
     updateReplica(name, viewNum);
     restore();
@@ -48,7 +47,6 @@ public:
       ++currentViewInfo.view;
     }
     viewInfo = currentViewInfo;
-    Log::debug("after  view(", currentViewInfo.view, ", ", currentViewInfo.primary, ", ", currentViewInfo.backup, ")");
   }
 
   void primary(string& result) {
@@ -108,7 +106,7 @@ protected:
     string name = it->first;
     if (currentViewInfo.primary == name) {
       if (it->second.viewNum != currentViewInfo.view) {
-        Log::trace("removeReplica(): ", "Can't remove primary, backup is not ready");
+        Log::warn("removeReplica(): ", "Can't remove primary, backup is not ready");
         return;
       }
       removePrimary();

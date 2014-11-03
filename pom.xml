@@ -16,7 +16,7 @@
         <artifactId>maven-thrift-plugin</artifactId>
         <version>0.1.11</version>
         <configuration>
-          <thriftExecutable>/usr/bin/thrift</thriftExecutable>
+          <thriftExecutable>thrift</thriftExecutable>
           <thriftSourceRoot>${basedir}/src</thriftSourceRoot>
         </configuration>
         <executions>
