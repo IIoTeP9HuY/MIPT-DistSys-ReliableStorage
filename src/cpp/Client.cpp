@@ -14,9 +14,10 @@ using namespace apache::thrift::transport;
 using namespace mipt::distsys::storage;
 
 int main(int argc, char** argv) {
-  boost::shared_ptr<TTransport> socket(new TSocket("0.0.0.0", 9090));
-  boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
-  boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+  using boost::shared_ptr;
+  shared_ptr<TTransport> socket(new TSocket("0.0.0.0", 9090));
+  shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+  shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
   CoordinatorClient client(protocol);
 
   try {

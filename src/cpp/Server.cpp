@@ -12,6 +12,8 @@
 #include <sstream>
 #include <unordered_map>
 
+#include "logger/logger.hpp"
+
 #include "../gen-cpp/Coordinator.h"
 #include "../gen-cpp/ReplicatedStorage_constants.h"
 
@@ -20,6 +22,8 @@ using namespace apache::thrift;
 using namespace apache::thrift::protocol;
 using namespace apache::thrift::transport;
 using namespace apache::thrift::server;
+
+using namespace logging;
 
 using namespace mipt::distsys::storage;
 
@@ -31,12 +35,12 @@ public:
     currentViewInfo.view = 0;
     currentViewInfo.primary = "";
     currentViewInfo.backup = "";
-    cerr << "Running server with " << "deadPings = " << deadPings << endl;
+    Log::info("Running server [deadPings: ", deadPings, "]");
   }
 
   void ping(ViewInfo& viewInfo, const int32_t viewNum, const string& name) {
-    cerr << "ping(" << viewNum << ", " << name << ")" << endl;
-    cerr << "before view(" << currentViewInfo.view << ", " << currentViewInfo.primary << ", " << currentViewInfo.backup << ")" << endl;
+    Log::trace("ping(", viewNum, ", ", name, ")");
+    Log::debug("before view(", currentViewInfo.view, ", ", currentViewInfo.primary, ", ", currentViewInfo.backup, ")");
     ViewInfo viewBefore = currentViewInfo;
     updateReplica(name, viewNum);
     restore();
@@ -44,17 +48,17 @@ public:
       ++currentViewInfo.view;
     }
     viewInfo = currentViewInfo;
-    cerr << "after  view(" << currentViewInfo.view << ", " << currentViewInfo.primary << ", " << currentViewInfo.backup << ")" << endl;
+    Log::debug("after  view(", currentViewInfo.view, ", ", currentViewInfo.primary, ", ", currentViewInfo.backup, ")");
   }
 
   void primary(string& result) {
-    cerr << "primary(): " << currentViewInfo.primary << endl;
+    Log::trace("primary(): ", currentViewInfo.primary);
     result = currentViewInfo.primary;
   }
 
   int tick() {
-    cerr << "tick()" << endl;
     ++currentTime;
+    Log::trace("tick(): ", currentTime);
     ViewInfo viewBefore = currentViewInfo;
     handleDeadReplicas();
     restore();
@@ -75,7 +79,7 @@ protected:
   };
 
   void handleDeadReplicas() {
-    // cerr << "handleDeadReplicas()" << endl;
+    Log::debug("handleDeadReplicas()");
     auto it = replicas.begin();
     auto next = it;
     while (it != replicas.end()) {
@@ -88,7 +92,7 @@ protected:
   }
 
   void updateReplica(const string& name, int viewNum) {
-    // cerr << "updateReplica(" << name << ", " << viewNum << ")" << endl;
+    Log::debug("updateReplica(", name, ", ", viewNum, ")");
     replicas[name].lastPingTime = currentTime;
     replicas[name].viewNum = viewNum;
 
@@ -100,9 +104,13 @@ protected:
   }
 
   void removeReplica(unordered_map<string, ReplicaInfo>::iterator it) {
-    cerr << "removeReplica(" << it->first << ")" << endl;
+    Log::debug("removeReplica(", it->first, ")");
     string name = it->first;
     if (currentViewInfo.primary == name) {
+      if (it->second.viewNum != currentViewInfo.view) {
+        Log::trace("removeReplica(): ", "Can't remove primary, backup is not ready");
+        return;
+      }
       removePrimary();
     }
     if (currentViewInfo.backup == name) {
@@ -112,10 +120,12 @@ protected:
   }
 
   void removePrimary() {
+    Log::trace("removePrimary(): ", currentViewInfo.primary);
     currentViewInfo.primary = "";
   }
 
   void removeBackup() {
+    Log::trace("removeBackup(): ", currentViewInfo.backup);
     currentViewInfo.backup = "";
   }
 
@@ -125,20 +135,20 @@ protected:
   }
 
   bool restorePrimary() {
-    // cerr << "restorePrimary()" << endl;
+    Log::debug("restorePrimary()");
     if (currentViewInfo.primary != "") {
       return false;
     }
     if (currentViewInfo.backup != "") {
-      cerr << "restorePrimary(): " 
-            << "swap primary(" << currentViewInfo.primary << ") " 
-            << "and backup(" << currentViewInfo.backup << ")" << endl;
+      Log::trace("restorePrimary(): ", 
+                "swap primary(", currentViewInfo.primary, ") ",
+                "and backup(", currentViewInfo.backup, ")");
       swap(currentViewInfo.primary, currentViewInfo.backup);
       return true;
     } else {
       for (const auto& it : replicas) {
         currentViewInfo.primary = it.first;
-        cerr << "restorePrimary(): " << "set new primary " << it.first << endl;
+        Log::trace("restorePrimary(): ", "set new primary ", it.first);
         return true;
       }
     }
@@ -146,7 +156,7 @@ protected:
   }
 
   bool restoreBackup() {
-    // cerr << "restoreBackup()" << endl;
+    Log::debug("restoreBackup()");
     if (currentViewInfo.backup != "") {
       return false;
     }
@@ -167,34 +177,14 @@ protected:
 };
 
 int main(int argc, char **argv) {
-  boost::shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
-  boost::shared_ptr<CoordinatorHandler> handler(new CoordinatorHandler());
-  boost::shared_ptr<TProcessor> processor(new CoordinatorProcessor(handler));
-  boost::shared_ptr<TServerTransport> serverTransport(new TServerSocket(9090));
-  boost::shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
+  using boost::shared_ptr;
+  shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+  shared_ptr<CoordinatorHandler> handler(new CoordinatorHandler());
+  shared_ptr<TProcessor> processor(new CoordinatorProcessor(handler));
+  shared_ptr<TServerTransport> serverTransport(new TServerSocket(9090));
+  shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
 
   TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
-
-  /**
-  * Or you could do one of these
-
-  boost::shared_ptr<ThreadManager> threadManager =
-  ThreadManager::newSimpleThreadManager(workerCount);
-  boost::shared_ptr<PosixThreadFactory> threadFactory =
-  boost::shared_ptr<PosixThreadFactory>(new PosixThreadFactory());
-  threadManager->threadFactory(threadFactory);
-  threadManager->start();
-  TThreadPoolServer server(processor,
-  serverTransport,
-  transportFactory,
-  protocolFactory,
-  threadManager);
-
-  TThreadedServer server(processor,
-  serverTransport,
-  transportFactory,
-  protocolFactory);
-  */
 
   cout << "Starting the server..." << endl;
   server.serve();
