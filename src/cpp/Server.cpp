@@ -40,10 +40,10 @@ public:
 
   void ping(ViewInfo& viewInfo, const int32_t viewNum, const string& name) {
     Log::trace("ping(", viewNum, ", ", name, ")");
-    bool viewChanged = false;
-    viewChanged |= updateReplica(name, viewNum);
-    viewChanged |= maintainReplication();
-    if (viewChanged) {
+    int viewChanges = 0;
+    viewChanges += updateReplica(name, viewNum);
+    viewChanges += maintainReplication();
+    if (viewChanges > 0) {
       ++currentViewInfo.view;
     }
     viewInfo = currentViewInfo;
@@ -57,10 +57,10 @@ public:
   int tick() {
     ++currentTime;
     Log::trace("tick(): ", currentTime);
-    bool viewChanged = false;
-    viewChanged |= handleDeadReplicas();
-    viewChanged |= maintainReplication();
-    if (viewChanged) {
+    int viewChanges = 0;
+    viewChanges += handleDeadReplicas();
+    viewChanges += maintainReplication();
+    if (viewChanges > 0) {
       ++currentViewInfo.view;
     }
     return currentTime;
@@ -78,17 +78,17 @@ protected:
 
   bool handleDeadReplicas() {
     Log::debug("handleDeadReplicas()");
-    bool viewChanged = false;
+    int viewChanges = 0;
     auto it = replicas.begin();
     auto next = it;
     while (it != replicas.end()) {
       ++next;
       if (currentTime >= it->second.lastPingTime + deadPings) {
-        viewChanged |= removeReplica(it);
+        viewChanges += removeReplica(it);
       }
       it = next;
     }
-    return viewChanged;
+    return viewChanges;
   }
 
   bool updateReplica(const string& name, int viewNum) {
@@ -107,6 +107,7 @@ protected:
 
   bool removeReplica(unordered_map<string, ReplicaInfo>::iterator it) {
     Log::debug("removeReplica(", it->first, ")");
+    bool viewChanged = false;
     string name = it->first;
     if (currentViewInfo.primary == name) {
       if (it->second.viewNum != currentViewInfo.view) {
@@ -114,14 +115,14 @@ protected:
         return false;
       }
       removePrimary();
-      return true;
+      viewChanged = true;
     }
     if (currentViewInfo.backup == name) {
       removeBackup();
-      return true;
+      viewChanged = true;
     }
     replicas.erase(it);
-    return false;
+    return viewChanged;
   }
 
   void removePrimary() {
@@ -135,10 +136,10 @@ protected:
   }
 
   bool maintainReplication() {
-    bool viewChanged = false;
-    viewChanged |= restorePrimary();
-    viewChanged |= restoreBackup();
-    return viewChanged;
+    int viewChanges = 0;
+    viewChanges += restorePrimary();
+    viewChanges += restoreBackup();
+    return viewChanges;
   }
 
   bool restorePrimary() {
