@@ -23,6 +23,8 @@ Dependencies:
   - JDK-7
   - Apache Thrift
   - Maven
+  
+For quick test you can use my snapshot on terminal.com: https://www.terminal.com/tiny/K2kxkGIVHJ
 
 To build on Ubuntu14.04:
 ```bash
