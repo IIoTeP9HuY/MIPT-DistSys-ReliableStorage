@@ -40,10 +40,10 @@ public:
 
   void ping(ViewInfo& viewInfo, const int32_t viewNum, const string& name) {
     Log::trace("ping(", viewNum, ", ", name, ")");
-    ViewInfo viewBefore = currentViewInfo;
-    updateReplica(name, viewNum);
-    restore();
-    if (viewBefore.primary != currentViewInfo.primary || viewBefore.backup != currentViewInfo.backup) {
+    int viewChanges = 0;
+    viewChanges += updateReplica(name, viewNum);
+    viewChanges += maintainReplication();
+    if (viewChanges > 0) {
       ++currentViewInfo.view;
     }
     viewInfo = currentViewInfo;
@@ -57,10 +57,10 @@ public:
   int tick() {
     ++currentTime;
     Log::trace("tick(): ", currentTime);
-    ViewInfo viewBefore = currentViewInfo;
-    handleDeadReplicas();
-    restore();
-    if (viewBefore.primary != currentViewInfo.primary || viewBefore.backup != currentViewInfo.backup) {
+    int viewChanges = 0;
+    viewChanges += handleDeadReplicas();
+    viewChanges += maintainReplication();
+    if (viewChanges > 0) {
       ++currentViewInfo.view;
     }
     return currentTime;
@@ -76,20 +76,22 @@ protected:
     int viewNum;
   };
 
-  void handleDeadReplicas() {
+  bool handleDeadReplicas() {
     Log::debug("handleDeadReplicas()");
+    int viewChanges = 0;
     auto it = replicas.begin();
     auto next = it;
     while (it != replicas.end()) {
       ++next;
       if (currentTime >= it->second.lastPingTime + deadPings) {
-        removeReplica(it);
+        viewChanges += removeReplica(it);
       }
       it = next;
     }
+    return viewChanges;
   }
 
-  void updateReplica(const string& name, int viewNum) {
+  bool updateReplica(const string& name, int viewNum) {
     Log::debug("updateReplica(", name, ", ", viewNum, ")");
     replicas[name].lastPingTime = currentTime;
     replicas[name].viewNum = viewNum;
@@ -97,24 +99,30 @@ protected:
     if (name == currentViewInfo.primary) {
       if (viewNum == 0) {
         removePrimary();
+        return true;
       }
     }
+    return false;
   }
 
-  void removeReplica(unordered_map<string, ReplicaInfo>::iterator it) {
+  bool removeReplica(unordered_map<string, ReplicaInfo>::iterator it) {
     Log::debug("removeReplica(", it->first, ")");
+    bool viewChanged = false;
     string name = it->first;
     if (currentViewInfo.primary == name) {
       if (it->second.viewNum != currentViewInfo.view) {
         Log::warn("removeReplica(): ", "Can't remove primary, backup is not ready");
-        return;
+        return false;
       }
       removePrimary();
+      viewChanged = true;
     }
     if (currentViewInfo.backup == name) {
       removeBackup();
+      viewChanged = true;
     }
     replicas.erase(it);
+    return viewChanged;
   }
 
   void removePrimary() {
@@ -127,9 +135,11 @@ protected:
     currentViewInfo.backup = "";
   }
 
-  void restore() {
-    restorePrimary();
-    restoreBackup();
+  bool maintainReplication() {
+    int viewChanges = 0;
+    viewChanges += restorePrimary();
+    viewChanges += restoreBackup();
+    return viewChanges;
   }
 
   bool restorePrimary() {
@@ -138,7 +148,7 @@ protected:
       return false;
     }
     if (currentViewInfo.backup != "") {
-      Log::trace("restorePrimary(): ", 
+      Log::trace("restorePrimary(): ",
                 "swap primary(", currentViewInfo.primary, ") ",
                 "and backup(", currentViewInfo.backup, ")");
       swap(currentViewInfo.primary, currentViewInfo.backup);
@@ -170,7 +180,6 @@ protected:
   int currentTime;
   ViewInfo currentViewInfo;
   unordered_map<string, ReplicaInfo> replicas;
-
   int deadPings;
 };
 
