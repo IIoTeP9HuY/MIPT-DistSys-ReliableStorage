@@ -24,7 +24,7 @@ Dependencies:
   - Apache Thrift
   - Maven
   
-For quick test you can use my snapshot on terminal.com: https://www.terminal.com/tiny/K2kxkGIVHJ
+For quick test you can use my snapshot on terminal.com: https://www.terminal.com/tiny/NqSoPdn7C1
 
 To build on Ubuntu14.04:
 ```bash
