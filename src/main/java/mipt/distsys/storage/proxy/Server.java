@@ -16,26 +16,37 @@ import mipt.distsys.storage.ViewInfo;
 
 public class Server extends UnicastRemoteObject implements ServerInterface
 {
+    Process serverProcess;
     TTransport transport;
     TProtocol protocol;
     mipt.distsys.storage.Server.Client client;
 
-    public Server(String serverName, String coordName) throws Exception {
+    public Server(String serverName, String coordName, int port, int coordPort) throws Exception {
         try {
-            transport = new TSocket("0.0.0.0", 9091);
+            runServer(port, serverName);
+            transport = new TSocket("0.0.0.0", port);
             transport.open();
 
             protocol = new TBinaryProtocol(transport);
             client = new mipt.distsys.storage.Server.Client(protocol);
+            client.setCoordinator("0.0.0.0:" + coordPort);
         } catch (TException x) {
             x.printStackTrace();
             throw new RemoteException();
         }
     }
 
+    protected void runServer(int port, String serverName) throws Exception {
+        ProcessBuilder pb = new ProcessBuilder("build/server", String.valueOf(port), serverName);
+        pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+        serverProcess = pb.start();
+    }
+
     @Override
-    protected void finalize() throws Throwable {
+    protected void finalize() {
         transport.close();
+        serverProcess.destroy();
     }
 
     public void put(String key, String value) throws RemoteException {

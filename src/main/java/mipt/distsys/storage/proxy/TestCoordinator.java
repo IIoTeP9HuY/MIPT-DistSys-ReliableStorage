@@ -4,14 +4,6 @@ import java.util.*;
 
 import mipt.distsys.storage.ViewInfo;
 
-class TestFailedException extends Exception
-{
-    TestFailedException(String message)
-    {
-        super(message);
-    }
-}
-
 public class TestCoordinator
 {
     static void test(ViewInfo info,

@@ -25,4 +25,6 @@ service Server {
   void putBackup(1:string key, 2:string value),
   string get(1:string key),
   i32 tick(),
+
+  void setCoordinator(1:string host),
 }
