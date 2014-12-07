@@ -10,7 +10,7 @@ set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 # CPP
 set(CPP_DIR ${SRC_DIR}/cpp)
 set(CLIENT_SRC ${CPP_DIR}/Client.cpp)
-set(SERVER_SRC ${CPP_DIR}/Server.cpp)
+set(COORDINATOR_SRC ${CPP_DIR}/Coordinator.cpp)
 set(LOGGER_SRC ${CPP_DIR}/logger/logger.hpp ${CPP_DIR}/logger/logger.cpp)
 
 # Thrift
@@ -40,7 +40,7 @@ add_library(logger ${LOGGER_SRC})
 
 include_directories(${GEN_FILES_PATH})
 add_executable(client ${CLIENT_SRC})
-add_executable(server ${SERVER_SRC})
+add_executable(coordinator ${COORDINATOR_SRC})
 
 target_link_libraries(client logger thrift thrift_interface)
-target_link_libraries(server logger thrift thrift_interface)
+target_link_libraries(coordinator logger thrift thrift_interface)
