@@ -19,3 +19,10 @@ service Coordinator {
   string primary() throws (1:ServiceException e),
   i32 tick(),
 }
+
+service Server {
+  void put(1:string key, 2:string value),
+  void putBackup(1:string key, 2:string value),
+  string get(1:string key),
+  i32 tick(),
+}

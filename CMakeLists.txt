@@ -11,6 +11,7 @@ set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(CPP_DIR ${SRC_DIR}/cpp)
 set(CLIENT_SRC ${CPP_DIR}/Client.cpp)
 set(COORDINATOR_SRC ${CPP_DIR}/Coordinator.cpp)
+set(SERVER_SRC ${CPP_DIR}/Server.cpp)
 set(LOGGER_SRC ${CPP_DIR}/logger/logger.hpp ${CPP_DIR}/logger/logger.cpp)
 
 # Thrift
@@ -23,6 +24,7 @@ set(THRIFT_SRC ${THRIFT_DIR}/ReplicatedStorage.thrift)
 set(GEN_FILES_PATH ${PROJECT_BINARY_DIR}/gen-cpp/)
 set(THRIFT_TARGETS
     ${GEN_FILES_PATH}/Coordinator.cpp
+    ${GEN_FILES_PATH}/Server.cpp
     ${GEN_FILES_PATH}/ReplicatedStorage_types.cpp
     ${GEN_FILES_PATH}/ReplicatedStorage_constants.cpp
     )
@@ -41,6 +43,8 @@ add_library(logger ${LOGGER_SRC})
 include_directories(${GEN_FILES_PATH})
 add_executable(client ${CLIENT_SRC})
 add_executable(coordinator ${COORDINATOR_SRC})
+add_executable(server ${SERVER_SRC})
 
 target_link_libraries(client logger thrift thrift_interface)
 target_link_libraries(coordinator logger thrift thrift_interface)
+target_link_libraries(server logger thrift thrift_interface)
