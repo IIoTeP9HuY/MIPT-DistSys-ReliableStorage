@@ -18,12 +18,14 @@ public class Coordinator extends UnicastRemoteObject implements CoordinatorInter
 {
     public static final int deadPings
         = mipt.distsys.storage.ReplicatedStorageConstants.DEAD_PINGS;
+    Process coordinatorProcess;
     TTransport transport;
     TProtocol protocol;
     mipt.distsys.storage.Coordinator.Client client;
 
     public Coordinator(int port) throws Exception {
         try {
+            runCoordinator(port);
             transport = new TSocket("0.0.0.0", port);
             transport.open();
 
@@ -35,9 +37,17 @@ public class Coordinator extends UnicastRemoteObject implements CoordinatorInter
         }
     }
 
+    protected void runCoordinator(int port) throws Exception {
+        ProcessBuilder pb = new ProcessBuilder("build/coordinator", String.valueOf(port));
+        pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+        coordinatorProcess = pb.start();
+    }
+
     @Override
-    protected void finalize() throws Throwable {
+    protected void finalize() {
         transport.close();
+        coordinatorProcess.destroy();
     }
 
     // this method is to be called by server

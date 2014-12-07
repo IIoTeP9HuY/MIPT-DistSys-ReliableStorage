@@ -155,5 +155,6 @@ public class TestCoordinator
         }
 
         java.rmi.server.UnicastRemoteObject.unexportObject(service, true);
+        service.finalize();
     }
 }
