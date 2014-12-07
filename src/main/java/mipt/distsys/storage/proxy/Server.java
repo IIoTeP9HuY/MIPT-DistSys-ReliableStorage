@@ -1,0 +1,77 @@
+package mipt.distsys.storage.proxy;
+
+import java.rmi.*;
+import java.rmi.server.*;
+import java.util.*;
+
+import org.apache.thrift.TException;
+import org.apache.thrift.transport.TSSLTransportFactory;
+import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TProtocol;
+
+import mipt.distsys.storage.ViewInfo;
+
+public class Server extends UnicastRemoteObject implements ServerInterface
+{
+    TTransport transport;
+    TProtocol protocol;
+    mipt.distsys.storage.Server.Client client;
+
+    public Server(String serverName, String coordName) throws Exception {
+        try {
+            transport = new TSocket("0.0.0.0", 9091);
+            transport.open();
+
+            protocol = new TBinaryProtocol(transport);
+            client = new mipt.distsys.storage.Server.Client(protocol);
+        } catch (TException x) {
+            x.printStackTrace();
+            throw new RemoteException();
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        transport.close();
+    }
+
+    public void put(String key, String value) throws RemoteException {
+        try {
+            client.put(key, value);
+        } catch (TException x) {
+            x.printStackTrace();
+            throw new RemoteException();
+        }
+    }
+
+    public void putBackup(String key, String value) throws RemoteException {
+        try {
+            client.putBackup(key, value);
+        } catch (TException x) {
+            x.printStackTrace();
+            throw new RemoteException();
+        }
+    }
+
+    public String get(String key) throws RemoteException {
+        try {
+            return client.get(key);
+        } catch (TException x) {
+            x.printStackTrace();
+            throw new RemoteException();
+        }
+    }
+
+    // this method is to be called automatically as time goes by
+    public int tick() throws RemoteException {
+        try {
+            return client.tick();
+        } catch (TException x) {
+            x.printStackTrace();
+            throw new RemoteException();
+        }
+    }
+}
