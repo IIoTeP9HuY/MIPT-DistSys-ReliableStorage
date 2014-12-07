@@ -35,7 +35,7 @@ public:
     currentViewInfo.view = 0;
     currentViewInfo.primary = "";
     currentViewInfo.backup = "";
-    Log::info("Running server [deadPings: ", deadPings, "]");
+    Log::info("Running coordinator [deadPings: ", deadPings, "]");
   }
 
   void ping(ViewInfo& viewInfo, const int32_t viewNum, const string& name) {
@@ -184,11 +184,17 @@ protected:
 };
 
 int main(int argc, char **argv) {
+  if (argc != 2) {
+    cout << "Usage: " << argv[0] << " PORT" << endl;
+    return 0;
+  }
+  const int port = stoi(argv[1]);
+
   using boost::shared_ptr;
   shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
   shared_ptr<CoordinatorHandler> handler(new CoordinatorHandler());
   shared_ptr<TProcessor> processor(new CoordinatorProcessor(handler));
-  shared_ptr<TServerTransport> serverTransport(new TServerSocket(9090));
+  shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
 
   TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);

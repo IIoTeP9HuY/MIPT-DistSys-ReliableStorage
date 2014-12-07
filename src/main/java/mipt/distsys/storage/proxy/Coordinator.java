@@ -16,15 +16,15 @@ import mipt.distsys.storage.ViewInfo;
 
 public class Coordinator extends UnicastRemoteObject implements CoordinatorInterface
 {
-    public static final int deadPings 
+    public static final int deadPings
         = mipt.distsys.storage.ReplicatedStorageConstants.DEAD_PINGS;
     TTransport transport;
     TProtocol protocol;
     mipt.distsys.storage.Coordinator.Client client;
 
-    public Coordinator() throws Exception {
+    public Coordinator(int port) throws Exception {
         try {
-            transport = new TSocket("0.0.0.0", 9090);
+            transport = new TSocket("0.0.0.0", port);
             transport.open();
 
             protocol = new TBinaryProtocol(transport);

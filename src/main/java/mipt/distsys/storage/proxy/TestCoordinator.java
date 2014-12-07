@@ -38,9 +38,15 @@ public class TestCoordinator
         System.err.println("Test passed: " + description);
     }
 
-    public static void main (String[] argv) throws Exception
+    public static void main(String[] argv) throws Exception
     {
-        Coordinator service = new Coordinator();
+        if (argv.length != 1) {
+            System.out.println("Usage: " + TestCoordinator.class.getName() + " PORT");
+            return;
+        }
+        int port = Integer.parseInt(argv[0]);
+
+        Coordinator service = new Coordinator(port);
         int longDelay = Coordinator.deadPings * 2;
         String srv1 = "localhost:10001";
         String srv2 = "localhost:10002";
