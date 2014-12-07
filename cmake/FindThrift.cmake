@@ -21,9 +21,10 @@ find_path(THRIFT_CONTRIB_DIR share/fb303/if/fb303.thrift HINTS
 set(THRIFT_LIB_PATHS
   $ENV{THRIFT_HOME}/lib
   /usr/local/lib
-  /opt/local/lib)
+  /opt/local/lib
+)
 
-find_path(THRIFT_SHARED_LIB_PATH libthrift.so PATHS ${THRIFT_LIB_PATHS})
+find_path(THRIFT_SHARED_LIB_PATH libthrift.so libthrift.dylib PATHS ${THRIFT_LIB_PATHS})
 find_path(THRIFT_STATIC_LIB_PATH libthrift.a PATHS ${THRIFT_LIB_PATHS})
 
 # prefer the thrift version supplied in THRIFT_HOME

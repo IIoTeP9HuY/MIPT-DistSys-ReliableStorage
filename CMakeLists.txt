@@ -31,7 +31,7 @@ add_custom_command(
 OUTPUT ${THRIFT_TARGETS}
 COMMAND
     thrift --gen cpp --gen java ${THRIFT_SRC}
-COMMENT "Thrifting service" 
+COMMENT "Thrifting service"
 )
 
 add_library(thrift_interface ${THRIFT_TARGETS})
