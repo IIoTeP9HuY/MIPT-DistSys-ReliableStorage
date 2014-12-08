@@ -36,6 +36,10 @@ public:
   ServerHandler(const string& name): name(name) {
   }
 
+  ServerHandler(const string& name, const string& host, int port): ServerHandler(name) {
+    setCoordinator(host, port);
+  }
+
   void put(const string& key, const string& value) override {
   }
 
@@ -47,7 +51,7 @@ public:
 
   int tick() {
     ++currentTime;
-    Log::trace("tick(): ", currentTime);
+    Log::trace(name, ": ", "tick(): ", currentTime);
     if (!client) {
       throw std::logic_error("Coordinator is not set");
     }
@@ -56,18 +60,24 @@ public:
     return currentTime;
   }
 
-  void setCoordinator(const string& host) override {
+  void setCoordinator(const string& host, int port) override {
+    Log::info(name, ": ", "setCoordinator(", host, ", ", port, ")");
     if (client) {
       transport->close();
     }
 
-    socket = boost::make_shared<TSocket>(host);
+    socket = boost::make_shared<TSocket>(host, port);
     transport = boost::make_shared<TBufferedTransport>(socket);
     protocol = boost::make_shared<TBinaryProtocol>(transport);
     client = boost::make_shared<CoordinatorClient>(protocol);
 
     try {
+      Log::trace(name, ": ", "transport->open()");
       transport->open();
+      ViewInfo viewInfo;
+      Log::trace(name, ": ", "client->ping()");
+      client->ping(viewInfo, 1, name);
+      Log::trace(name, ": ", "client->ping(): success");
     } catch (TException& tx) {
       cout << "ERROR: " << tx.what() << endl;
     }
@@ -96,13 +106,14 @@ int main(int argc, char **argv) {
   using boost::shared_ptr;
   shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
   shared_ptr<ServerHandler> handler(new ServerHandler(serverName));
+  // shared_ptr<ServerHandler> handler(new ServerHandler(serverName, "0.0.0.0", 9090));
   shared_ptr<TProcessor> processor(new ServerProcessor(handler));
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
 
-  TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+  TThreadedServer server(processor, serverTransport, transportFactory, protocolFactory);
 
-  cout << "Starting the server..." << endl;
+  cout << "Starting server '" << serverName << "' on port " << port << endl;
   server.serve();
   cout << "Done." << endl;
   return 0;

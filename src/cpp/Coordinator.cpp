@@ -197,9 +197,9 @@ int main(int argc, char **argv) {
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
 
-  TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+  TThreadedServer server(processor, serverTransport, transportFactory, protocolFactory);
 
-  cout << "Starting the server..." << endl;
+  cout << "Starting coordinator on port " << port << endl;
   server.serve();
   cout << "Done." << endl;
   return 0;

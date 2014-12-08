@@ -29,7 +29,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface
 
             protocol = new TBinaryProtocol(transport);
             client = new mipt.distsys.storage.Server.Client(protocol);
-            client.setCoordinator("0.0.0.0:" + coordPort);
+            client.setCoordinator("0.0.0.0", coordPort);
         } catch (TException x) {
             x.printStackTrace();
             throw new RemoteException();
@@ -41,6 +41,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         serverProcess = pb.start();
+        Thread.sleep(1000);
     }
 
     @Override

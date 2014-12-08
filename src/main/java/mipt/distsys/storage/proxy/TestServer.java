@@ -27,12 +27,12 @@ public class TestServer
         String srv2Name = "server2";
 
         Coordinator coordinator = new Coordinator(coordPort);
-        Naming.rebind(coordName, coordinator);
+        // Naming.rebind(coordName, coordinator);
 
         Server server1 = new Server(srv1Name, coordName, srv1Port, coordPort);
         Server server2 = new Server(srv2Name, coordName, srv2Port, coordPort);
-        Naming.rebind(srv1Name, server1);
-        Naming.rebind(srv2Name, server2);
+        // Naming.rebind(srv1Name, server1);
+        // Naming.rebind(srv2Name, server2);
 
         int longDelay = Coordinator.deadPings * 2;
 
@@ -68,7 +68,7 @@ public class TestServer
 
         // ex-primary restarts
         server1 = new Server(srv1Name, coordName, srv1Port, coordPort);
-        Naming.rebind(srv1Name, server1);
+        // Naming.rebind(srv1Name, server1);
         for (int i = 0; i < longDelay; ++i) {
             coordinator.tick();
             server1.tick();

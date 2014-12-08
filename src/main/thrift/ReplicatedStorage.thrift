@@ -26,5 +26,5 @@ service Server {
   string get(1:string key),
   i32 tick(),
 
-  void setCoordinator(1:string host),
+  void setCoordinator(1:string host, 2:i32 port),
 }
