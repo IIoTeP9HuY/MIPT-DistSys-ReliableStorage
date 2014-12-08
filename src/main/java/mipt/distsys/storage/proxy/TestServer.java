@@ -16,6 +16,7 @@ public class TestServer
     {
         if (argv.length != 1) {
             System.out.println("Usage: java " + TestServer.class.getName() + " PORT");
+            return;
         }
 
         int coordPort = Integer.parseInt(argv[0]);
