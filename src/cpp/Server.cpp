@@ -40,7 +40,6 @@ std::vector<std::string> &split(const std::string &s, char delim, std::vector<st
   return elems;
 }
 
-
 std::vector<std::string> split(const std::string &s, char delim) {
   std::vector<std::string> elems;
   split(s, delim, elems);
@@ -256,7 +255,6 @@ int main(int argc, char **argv) {
   using boost::shared_ptr;
   shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
   shared_ptr<ServerHandler> handler(new ServerHandler(serverName));
-  // shared_ptr<ServerHandler> handler(new ServerHandler(serverName, "0.0.0.0", 9090));
   shared_ptr<TProcessor> processor(new ServerProcessor(handler));
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
