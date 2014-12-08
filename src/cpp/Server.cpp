@@ -180,7 +180,7 @@ public:
     coordinator.open(hostPort);
   }
 
-  void copyToBackup() {
+  void copyDataToBackup() {
     for (const auto& data : storage) {
       backup.client->putBackup(data.first, data.second);
     }
@@ -194,6 +194,7 @@ public:
     }
     if (!hostPort.empty()) {
       backup.open(hostPort);
+      copyDataToBackup();
     }
     view.backup = hostPort;
   }
