@@ -21,15 +21,17 @@ public class Server extends UnicastRemoteObject implements ServerInterface
     TProtocol protocol;
     mipt.distsys.storage.Server.Client client;
 
-    public Server(String serverName, String coordName, int port, int coordPort) throws Exception {
+    public Server(String serverName, String coordName) throws Exception {
+        HostPort server = new HostPort(serverName);
+        HostPort coord = new HostPort(coordName);
         try {
-            runServer(port, serverName);
-            transport = new TSocket("0.0.0.0", port);
+            runServer(server.port, server.host);
+            transport = new TSocket(server.host, server.port);
             transport.open();
 
             protocol = new TBinaryProtocol(transport);
             client = new mipt.distsys.storage.Server.Client(protocol);
-            client.setCoordinator("0.0.0.0", coordPort);
+            client.setCoordinator(coordName);
         } catch (TException x) {
             x.printStackTrace();
             throw new RemoteException();
@@ -41,7 +43,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         serverProcess = pb.start();
-        Thread.sleep(1000);
+        Thread.sleep(300);
     }
 
     @Override
@@ -53,6 +55,8 @@ public class Server extends UnicastRemoteObject implements ServerInterface
     public void put(String key, String value) throws RemoteException {
         try {
             client.put(key, value);
+        } catch (mipt.distsys.storage.IncorrectOperationException e) {
+            throw new IncorrectOperationException(e.why);
         } catch (TException x) {
             x.printStackTrace();
             throw new RemoteException();
@@ -62,6 +66,8 @@ public class Server extends UnicastRemoteObject implements ServerInterface
     public void putBackup(String key, String value) throws RemoteException {
         try {
             client.putBackup(key, value);
+        } catch (mipt.distsys.storage.IncorrectOperationException e) {
+            throw new IncorrectOperationException(e.why);
         } catch (TException x) {
             x.printStackTrace();
             throw new RemoteException();
@@ -71,6 +77,8 @@ public class Server extends UnicastRemoteObject implements ServerInterface
     public String get(String key) throws RemoteException {
         try {
             return client.get(key);
+        } catch (mipt.distsys.storage.IncorrectOperationException e) {
+            throw new IncorrectOperationException(e.why);
         } catch (TException x) {
             x.printStackTrace();
             throw new RemoteException();

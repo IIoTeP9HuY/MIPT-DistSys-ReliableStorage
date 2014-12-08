@@ -12,6 +12,11 @@ exception ServiceException {
   2: string why,
 }
 
+exception IncorrectOperationException {
+  1: i32 what,
+  2: string why,
+}
+
 const i32 DEAD_PINGS = 3;
 
 service Coordinator {
@@ -21,10 +26,10 @@ service Coordinator {
 }
 
 service Server {
-  void put(1:string key, 2:string value),
-  void putBackup(1:string key, 2:string value),
-  string get(1:string key),
+  void put(1:string key, 2:string value) throws (1:IncorrectOperationException e),
+  void putBackup(1:string key, 2:string value) throws (1:IncorrectOperationException e),
+  string get(1:string key) throws (1:IncorrectOperationException e),
   i32 tick(),
 
-  void setCoordinator(1:string host, 2:i32 port),
+  void setCoordinator(1:string hostPort),
 }

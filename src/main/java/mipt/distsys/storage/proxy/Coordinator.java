@@ -42,7 +42,7 @@ public class Coordinator extends UnicastRemoteObject implements CoordinatorInter
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         coordinatorProcess = pb.start();
-        Thread.sleep(1000);
+        Thread.sleep(300);
     }
 
     @Override

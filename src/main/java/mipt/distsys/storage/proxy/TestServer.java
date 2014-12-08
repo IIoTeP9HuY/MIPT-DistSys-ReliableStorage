@@ -22,15 +22,15 @@ public class TestServer
         int srv1Port = coordPort + 1;
         int srv2Port = coordPort + 2;
 
-        String coordName = "coordinator1";
-        String srv1Name = "server1";
-        String srv2Name = "server2";
+        String coordName = "0.0.0.0:" + String.valueOf(coordPort);
+        String srv1Name = "0.0.0.0:" + String.valueOf(srv1Port);
+        String srv2Name = "0.0.0.0:" + String.valueOf(srv2Port);
 
         Coordinator coordinator = new Coordinator(coordPort);
         // Naming.rebind(coordName, coordinator);
 
-        Server server1 = new Server(srv1Name, coordName, srv1Port, coordPort);
-        Server server2 = new Server(srv2Name, coordName, srv2Port, coordPort);
+        Server server1 = new Server(srv1Name, coordName);
+        Server server2 = new Server(srv2Name, coordName);
         // Naming.rebind(srv1Name, server1);
         // Naming.rebind(srv2Name, server2);
 
@@ -67,7 +67,7 @@ public class TestServer
         test(server2.get("b").equals("bbb"));
 
         // ex-primary restarts
-        server1 = new Server(srv1Name, coordName, srv1Port, coordPort);
+        server1 = new Server(srv1Name, coordName);
         // Naming.rebind(srv1Name, server1);
         for (int i = 0; i < longDelay; ++i) {
             coordinator.tick();
