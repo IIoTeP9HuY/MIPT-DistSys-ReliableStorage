@@ -34,10 +34,16 @@ To build on Ubuntu14.04:
 
 To run tests:
 ```bash
-  ./run_tests.sh
+  ./run_coordinator_tests.sh
+  ./run_server_tests.sh
 ```
 
-To run Coordinator server:
+To run Coordinator:
 ```bash
-  ./build/server
+  ./build/coordinator 9090
+```
+
+To run Data Server:
+```bash
+  ./build/server 9091
 ```
