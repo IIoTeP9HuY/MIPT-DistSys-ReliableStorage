@@ -17,7 +17,7 @@ them only for educational purposes :)
 Description
 ============================
 
-System implements distributed replicated std::map<string, string>.
+System implements distributed replicated std::map\<string, string\>.
 
 It consists of two components:
   - **Coordinator** - keeps track of data nodes, processes heartbeats, gives client information about current master node.
